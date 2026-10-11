@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: 语法检查 / 配置校验 / 脱敏自查
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: 校验 Shell 语法（bash -n）
+        run: |
+          fail=0
+          for f in scripts/*.sh tools/*.sh; do
+            printf '→ %s\n' "$f"
+            bash -n "$f" || fail=1
+          done
+          exit $fail
+
+      - name: 校验 Python 语法
+        run: |
+          python3 -m py_compile scripts/ss-uri.py
+
+      - name: 自测 ss:// 生成器（生成后回解校验）
+        run: |
+          uri="$(python3 scripts/ss-uri.py \
+            --host 203.0.113.10 --port 8388 \
+            --method xchacha20-ietf-poly1305 \
+            --password 'ci-dummy-pass' --tag ci --verify --quiet)"
+          case "$uri" in
+            ss://*) echo "OK: $uri" ;;
+            *) echo "生成的链接格式不对: $uri"; exit 1 ;;
+          esac
+
+      - name: 校验 JSON 示例配置
+        run: |
+          fail=0
+          for f in configs/*.json.example; do
+            printf '→ %s\n' "$f"
+            python3 -m json.tool "$f" >/dev/null || fail=1
+          done
+          exit $fail
+
+      - name: 脱敏自查（私钥 / 公网 IP / ss:// 凭据 / 明文密码）
+        run: |
+          chmod +x tools/secret-scan.sh
+          ./tools/secret-scan.sh --all
+
+      - name: 检查 Markdown 相对链接指向的文件是否存在
+        run: python3 tools/check-links.py .
+
+  shellcheck:
+    name: shellcheck（提示性，不阻塞合并）
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: 安装 shellcheck
+        run: sudo apt-get update && sudo apt-get install -y shellcheck
+      - name: 运行 shellcheck（仅报告，不阻断）
+        run: |
+          shellcheck --version
+          for f in scripts/*.sh tools/*.sh; do
+            echo "===== $f ====="
+            shellcheck --severity=warning "$f" || true
+          done
