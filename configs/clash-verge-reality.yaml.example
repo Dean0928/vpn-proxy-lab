@@ -1,0 +1,53 @@
+# Clash Verge / Clash Meta 客户端配置模板（Reality 路线）
+#
+# ⚠️ 这是失败路线（Xray + VLESS + Reality）留下的客户端配置骨架，仅作学习参考。
+#    参数之间是**成对耦合**的，任意一项错位，客户端只会报"超时"：
+#      服务端 privateKey  ←→ 客户端 publicKey（即服务端 reality 的 publicKey）
+#      服务端 shortIds[i] ←→ 客户端 short-id
+#      服务端 dest / serverNames ←→ 客户端 servername + sni
+#    排障方法见 docs/06-troubleshooting-playbook.md
+#
+# 使用前请替换所有 <...> 占位符。
+
+mixed-port: 7890
+allow-lan: false
+mode: rule
+log-level: info
+ipv6: false
+
+proxies:
+  - name: "reality-node"
+    type: vless
+    server: <SERVER_IP>
+    port: 443
+    uuid: <REPLACE_WITH_RANDOM_UUID>
+    network: tcp
+    tls: true
+    udp: true
+    flow: xtls-rprx-vision
+    servername: <REAL_SITE_HOST>       # 必须与服务端 serverNames 一致
+    client-fingerprint: chrome
+    reality-opts:
+      public-key: <REALITY_PUBLIC_KEY> # 由服务端私钥推导，必须成对
+      short-id: <SHORT_ID_HEX>         # 必须命中服务端 shortIds 之一
+
+  # 对照组：本次实验真正跑通的 Shadowsocks 节点
+  - name: "shadowsocks-node"
+    type: ss
+    server: <SERVER_IP>
+    port: 8388
+    cipher: xchacha20-ietf-poly1305
+    password: <SS_PASSWORD>
+    udp: true
+
+proxy-groups:
+  - name: "PROXY"
+    type: select
+    proxies:
+      - "shadowsocks-node"
+      - "reality-node"
+      - DIRECT
+
+rules:
+  - GEOIP,CN,DIRECT
+  - MATCH,PROXY

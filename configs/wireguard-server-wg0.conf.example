@@ -1,0 +1,27 @@
+# WireGuard 服务端配置模板（/etc/wireguard/wg0.conf）
+# 用法：把 <...> 占位符替换为真实值，保存为 /etc/wireguard/wg0.conf 并 chmod 600
+# 生成密钥：umask 077 && wg genkey | tee server.key | wg pubkey > server.pub
+
+[Interface]
+# 服务端在隧道内的地址（/24 表示整个隧道网段）
+Address    = 10.8.0.1/24
+ListenPort = 51820
+PrivateKey = <SERVER_PRIVATE_KEY>
+
+# 开启转发与 NAT，让客户端借用服务器的公网出口
+# eth0 需替换为本机真实出口网卡：ip route get 1.1.1.1
+PostUp   = iptables -A FORWARD -i %i -j ACCEPT; iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+PostDown = iptables -D FORWARD -i %i -j ACCEPT; iptables -t nat -D POSTROUTING -o eth0 -j MASQUERADE
+
+# 可选：限制隧道内 MTU，避免跨国链路上大包被丢
+# MTU = 1380
+
+[Peer]
+# client1 —— 客户端名（仅注释用途）
+PublicKey  = <CLIENT1_PUBLIC_KEY>
+AllowedIPs = 10.8.0.2/32
+
+# 多客户端时继续追加 [Peer] 段落：
+# [Peer]
+# PublicKey  = <CLIENT2_PUBLIC_KEY>
+# AllowedIPs = 10.8.0.3/32

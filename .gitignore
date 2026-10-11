@@ -1,0 +1,30 @@
+# 忽略 macOS / 编辑器 / Python / 运行时产生的内容
+
+.DS_Store
+._*
+Thumbs.db
+
+.idea/
+.vscode/
+*.swp
+
+__pycache__/
+*.py[cod]
+
+# 真实配置与凭据：绝不入库
+*.real.conf
+*.key
+*.pem
+*_private.key
+server.key
+client.key
+authorized_keys
+*.log
+config.json
+wg0.conf
+
+# 本地验证产物
+*.bak
+*.bak.*
+tmp/
+out/

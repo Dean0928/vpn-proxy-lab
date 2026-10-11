@@ -1,0 +1,11 @@
+{
+    "server": "0.0.0.0",
+    "server_port": 8388,
+    "password": "<REPLACE_WITH_STRONG_RANDOM_PASSWORD>",
+    "method": "xchacha20-ietf-poly1305",
+    "timeout": 300,
+    "mode": "tcp_and_udp",
+    "fast_open": false,
+    "nameserver": "1.1.1.1",
+    "comments": "本文件为模板，不含任何真实凭据；scripts/02-install-shadowsocks.sh 会生成同结构配置"
+}

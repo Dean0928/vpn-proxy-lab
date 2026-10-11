@@ -1,0 +1,21 @@
+# WireGuard 客户端配置模板
+# 导入到 WireGuard 官方客户端（Windows / macOS / iOS / Android）
+# 私钥不要外发；本文件权限建议设为 600
+
+[Interface]
+PrivateKey = <CLIENT_PRIVATE_KEY>
+Address    = 10.8.0.2/24
+DNS        = 1.1.1.1
+
+[Peer]
+PublicKey           = <SERVER_PUBLIC_KEY>
+Endpoint            = <SERVER_IP>:51820
+
+# 全局代理：所有流量走隧道
+AllowedIPs          = 0.0.0.0/0, ::/0
+
+# 分流写法：只让某个网段走隧道，其余直连
+# AllowedIPs        = 10.8.0.0/24, 192.168.1.0/24
+
+# 客户端位于 NAT 之后时保活，避免隧道被中间设备回收
+PersistentKeepalive = 25
