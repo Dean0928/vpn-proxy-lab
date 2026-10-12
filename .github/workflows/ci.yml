@@ -29,7 +29,7 @@ jobs:
 
       - name: 校验 Python 语法
         run: |
-          python3 -m py_compile scripts/ss-uri.py
+          python3 -m py_compile scripts/ss-uri.py tools/check-links.py tools/redact-images.py
 
       - name: 自测 ss:// 生成器（生成后回解校验）
         run: |

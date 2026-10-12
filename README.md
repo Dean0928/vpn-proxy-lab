@@ -88,6 +88,7 @@ vpn-proxy-lab/
 │   └── clash-verge-reality.yaml.example
 ├── tools/
 │   ├── secret-scan.sh            # 发布前脱敏自查：私钥 / 公网 IP / ss:// 凭据 / 明文密码
+│   ├── redact-images.py          # 截图脱敏（可审计：矩形坐标即代码，输出可复现）
 │   └── check-links.py            # 检查 Markdown 相对链接是否有效
 ├── images/                       # 实验截图（IP / 端口 / 密码 / 域名 / UUID 全部打码）
 └── .github/workflows/ci.yml      # 语法检查 + JSON 校验 + 脱敏自查 + 链接检查
